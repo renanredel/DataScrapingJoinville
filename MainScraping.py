@@ -3,6 +3,12 @@ import urllib.request
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
+url = "https://transparencia.joinville.sc.gov.br/?p=5&inicio=01/01/2020&fim=31/12/2020"
+page = urllib.request.urlopen(url)
+driver = webdriver.Firefox()
+
+
+
 
 def scrap(driverPage, url):
     soup = BeautifulSoup(driverPage, 'html.parser')
@@ -11,24 +17,12 @@ def scrap(driverPage, url):
     for result in soup.findAll('table', {'class': 'tableDados'}):
         for line in result.findAll('td'):
             indice = indice + 1
-            print(indice)
+            #print(indice)
             print(line.text.ljust(10))
             if indice / 6 == 50:
-                nextpage(url)
+                driver.find_element_by_xpath("//*[@id='menuPaginacao']/li[5]/a").click()
+                scrap(driver.page_source, driver.current_url)
 
-
-
-def nextpage(url):
-    driver2 = webdriver.Firefox()
-    driver2.get(url)
-    driver2.find_element_by_xpath("//*[@id='menuPaginacao']/li[5]/a").click()
-
-
-
-url = "https://transparencia.joinville.sc.gov.br/?p=5&inicio=01/01/2020&fim=31/12/2020"
-page = urllib.request.urlopen(url)
-
-driver = webdriver.Firefox()
 
 driver.get(url)
 
