@@ -9,9 +9,11 @@ page = urllib.request.urlopen(url)
 driver = webdriver.Firefox()
 
 
-
-def values(driverPage, url):
-    print(url)
+def getvalues():
+    proventos = driver.find_element_by_xpath("/html/body/form/div[4]/table[4]/thead/tr/td[2]").text
+    descontos = driver.find_element_by_xpath("/html/body/form/div[4]/table[4]/thead/tr/td[3]").text
+    print(proventos)
+    print(descontos)
 
 
 def scrap(driverPage):
@@ -26,9 +28,9 @@ def scrap(driverPage):
                 print(line.text.ljust(10))
                 curWindowHndl = driver.current_window_handle
                 driver.find_element_by_partial_link_text(line.text).click()
-                sleep(2)
+                sleep(4)
                 driver.switch_to_window(driver.window_handles[1])
-                values(driver.page_source, driver.current_url)
+                getvalues()
                 driver.close()
                 driver.switch_to_window(curWindowHndl)
             else:
@@ -38,7 +40,7 @@ def scrap(driverPage):
             ###GO TO NEXT PAGE###
             if indice / 6 == 50:
                 driver.find_element_by_xpath("//*[@id='menuPaginacao']/li[5]/a").click()
-                scrap(driver.page_source, driver.current_url)
+                scrap(driver.page_source)
 
 
 driver.get(url)
@@ -52,7 +54,7 @@ driver.find_element_by_xpath("//*[@id='id_entidade']/option[15]").click()
 
 #### SELECIONA O MES
 driver.find_element_by_id("nr_mes").click()
-driver.find_element_by_xpath("//*[@id='nr_mes']/option[1]").click()
+driver.find_element_by_xpath("//*[@id='nr_mes']/option[2]").click()
 
 #### SELECIONA O ANO
 driver.find_element_by_id("nr_ano").click()
@@ -71,7 +73,5 @@ driver.find_element_by_id("ds_cargo").send_keys("EDUCADOR")
 
 #### CONSULTAR
 driver.find_element_by_xpath("/html/body/form/div[4]/table[1]/tbody/tr[6]/td[2]/input").click()
-
-# soup = BeautifulSoup(driver.page_source)
 
 scrap(driver.page_source)
