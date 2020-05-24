@@ -1,4 +1,5 @@
 import urllib.request
+from time import sleep
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -9,16 +10,32 @@ driver = webdriver.Firefox()
 
 
 
+def values(driverPage, url):
+    print(url)
 
-def scrap(driverPage, url):
+
+def scrap(driverPage):
     soup = BeautifulSoup(driverPage, 'html.parser')
 
     indice = 0
     for result in soup.findAll('table', {'class': 'tableDados'}):
+        i = 0
         for line in result.findAll('td'):
+            i=i+1
+            if i/3 == 1:
+                print(line.text.ljust(10))
+                curWindowHndl = driver.current_window_handle
+                driver.find_element_by_partial_link_text(line.text).click()
+                sleep(2)
+                driver.switch_to_window(driver.window_handles[1])
+                values(driver.page_source, driver.current_url)
+                driver.close()
+                driver.switch_to_window(curWindowHndl)
+            else:
+                if i/3 == 2:
+                    i = 0
             indice = indice + 1
-            #print(indice)
-            print(line.text.ljust(10))
+            ###GO TO NEXT PAGE###
             if indice / 6 == 50:
                 driver.find_element_by_xpath("//*[@id='menuPaginacao']/li[5]/a").click()
                 scrap(driver.page_source, driver.current_url)
@@ -57,4 +74,4 @@ driver.find_element_by_xpath("/html/body/form/div[4]/table[1]/tbody/tr[6]/td[2]/
 
 # soup = BeautifulSoup(driver.page_source)
 
-scrap(driver.page_source, driver.current_url)
+scrap(driver.page_source)
