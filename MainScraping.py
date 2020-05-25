@@ -12,23 +12,32 @@ url = "https://transparencia.joinville.sc.gov.br/?p=5&inicio=01/01/2020&fim=31/1
 page = urllib.request.urlopen(url)
 driver = webdriver.Firefox()
 
+values = pd.DataFrame()
+name = []
 prov = []
 desc = []
 liqui = []
 
 
-def getvalues():
+def savecsv():
+    ### PEGA O PRIMEIRO NOME ###
+    values['primeiro nome'] = ([x.split()[0] for x in name])
+    values['nome completo'] = name
+    values['proventos'] = prov
+    values['descontos'] = desc
+    values['liquido'] = liqui
+    values.to_csv('valores.csv')
 
+
+def getvalues():
     proventos = driver.find_element_by_xpath("/html/body/form/div[4]/table[4]/thead/tr/td[2]").text
     descontos = driver.find_element_by_xpath("/html/body/form/div[4]/table[4]/thead/tr/td[3]").text
 
-
-
-    ### REMOVE R$ ####
+    ### REMOVE R$ ###
     descontos = (descontos[3:])
     proventos = (proventos[3:])
 
-    ### REPLACE ',' FOR '.' ###
+    ### SUBSTITUI ',' POR '.' ###
     proventos = (re.sub("[.]", "", proventos))
     proventos = (re.sub("[,]", ".", proventos))
 
@@ -38,15 +47,8 @@ def getvalues():
     prov.append(proventos)
     desc.append(descontos)
     liqui.append(Decimal(proventos) - Decimal(descontos))
-
     print(proventos)
     print(descontos)
-
-    values = pd.DataFrame()
-    values['proventos'] = prov
-    values['descontos'] = desc
-    values['liquido'] = liqui
-    values.to_csv('valores.csv')
 
 
 def scrap(driverPage):
@@ -59,52 +61,64 @@ def scrap(driverPage):
             i = i + 1
             if i / 3 == 1:
                 print(line.text.ljust(10))
+                name.append(line.text)
+
+                ### SALVA A JANELA PRINCIPAL (PAGINA ATUAL) ###
                 curWindowHndl = driver.current_window_handle
+
+                ### CLICA NO LINK ###
                 driver.find_element_by_partial_link_text(line.text).click()
+
+                ### AGUARDA 4 SEGUNDOS ATÉ A PAGINA CARREGAR COMPLETAMENTE ###
                 sleep(4)
+
+                ### TROCA PARA A ABA ABERTA ###
                 driver.switch_to_window(driver.window_handles[1])
                 getvalues()
+
+                ### FECHA A ABA ###
                 driver.close()
+
+                ### RETORNA PARA JANELA PRINCIPAL ###
                 driver.switch_to_window(curWindowHndl)
             else:
                 if i / 3 == 2:
                     i = 0
             indice = indice + 1
-            ###GO TO NEXT PAGE###
-            if indice / 6 == 50:
-                driver.find_element_by_xpath("//*[@id='menuPaginacao']/li[5]/a").click()
-                scrap(driver.page_source)
+    ###GO TO NEXT PAGE###
+    if indice / 6 == 50:
+        driver.find_element_by_xpath("//*[@id='menuPaginacao']/li[5]/a").click()
+        scrap(driver.page_source)
 
 
 driver.get(url)
 
-#### SELECIONA A UNIDADE
+### SELECIONA A UNIDADE ###
 
 unidadeSelect = driver.find_element_by_id("id_entidade")
 unidadeSelect.click()
-# unidadeSelect.send_keys("Prefeitura")
 driver.find_element_by_xpath("//*[@id='id_entidade']/option[15]").click()
 
-#### SELECIONA O MES
+### SELECIONA O MES ###
 driver.find_element_by_id("nr_mes").click()
 driver.find_element_by_xpath("//*[@id='nr_mes']/option[2]").click()
 
-#### SELECIONA O ANO
+### SELECIONA O ANO ###
 driver.find_element_by_id("nr_ano").click()
 driver.find_element_by_xpath("//*[@id='nr_ano']/option[2]").click()
 
-#### SELECIONA A SITUAÇÃO
+### SELECIONA A SITUAÇÃO ###
 driver.find_element_by_id("id_situacao").click()
 driver.find_element_by_xpath("//*[@id='id_situacao']/option[19]").click()
 
-#### SELECIONA O VINCULO
+### SELECIONA O VINCULO ###
 driver.find_element_by_id("iVinculoFiltroPeloCampo").click()
 driver.find_element_by_xpath("//*[@id='iVinculoFiltroPeloCampo']/option[6]").click()
 
-#### DIGITA O CARGO
+### DIGITA O CARGO ###
 driver.find_element_by_id("ds_cargo").send_keys("EDUCADOR")
 
-#### CONSULTAR
+### CONSULTAR ###
 driver.find_element_by_xpath("/html/body/form/div[4]/table[1]/tbody/tr[6]/td[2]/input").click()
 
 scrap(driver.page_source)
