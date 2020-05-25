@@ -1,5 +1,9 @@
 import urllib.request
+from decimal import Decimal
+
+import pandas as pd
 from time import sleep
+import re
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -8,12 +12,41 @@ url = "https://transparencia.joinville.sc.gov.br/?p=5&inicio=01/01/2020&fim=31/1
 page = urllib.request.urlopen(url)
 driver = webdriver.Firefox()
 
+prov = []
+desc = []
+liqui = []
+
 
 def getvalues():
+
     proventos = driver.find_element_by_xpath("/html/body/form/div[4]/table[4]/thead/tr/td[2]").text
     descontos = driver.find_element_by_xpath("/html/body/form/div[4]/table[4]/thead/tr/td[3]").text
+
+
+
+    ### REMOVE R$ ####
+    descontos = (descontos[3:])
+    proventos = (proventos[3:])
+
+    ### REPLACE ',' FOR '.' ###
+    proventos = (re.sub("[.]", "", proventos))
+    proventos = (re.sub("[,]", ".", proventos))
+
+    descontos = (re.sub("[.]", "", descontos))
+    descontos = (re.sub("[,]", ".", descontos))
+
+    prov.append(proventos)
+    desc.append(descontos)
+    liqui.append(Decimal(proventos) - Decimal(descontos))
+
     print(proventos)
     print(descontos)
+
+    values = pd.DataFrame()
+    values['proventos'] = prov
+    values['descontos'] = desc
+    values['liquido'] = liqui
+    values.to_csv('valores.csv')
 
 
 def scrap(driverPage):
@@ -23,8 +56,8 @@ def scrap(driverPage):
     for result in soup.findAll('table', {'class': 'tableDados'}):
         i = 0
         for line in result.findAll('td'):
-            i=i+1
-            if i/3 == 1:
+            i = i + 1
+            if i / 3 == 1:
                 print(line.text.ljust(10))
                 curWindowHndl = driver.current_window_handle
                 driver.find_element_by_partial_link_text(line.text).click()
@@ -34,7 +67,7 @@ def scrap(driverPage):
                 driver.close()
                 driver.switch_to_window(curWindowHndl)
             else:
-                if i/3 == 2:
+                if i / 3 == 2:
                     i = 0
             indice = indice + 1
             ###GO TO NEXT PAGE###
