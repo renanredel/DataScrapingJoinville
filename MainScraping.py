@@ -1,23 +1,20 @@
 import urllib.request
-from decimal import Decimal
-
 import pandas as pd
-from time import sleep
 import re
-
+import warnings
+from decimal import Decimal
+from time import sleep
 from bs4 import BeautifulSoup
 from selenium import webdriver
+
+warnings.filterwarnings("ignore")
 
 url = "https://transparencia.joinville.sc.gov.br/?p=5&inicio=01/01/2020&fim=31/12/2020"
 page = urllib.request.urlopen(url)
 driver = webdriver.Firefox()
 
 values = pd.DataFrame()
-name = []
-prov = []
-desc = []
-liqui = []
-
+name, prov, desc, liqui, admin, anostrab = [],[],[],[],[],[]
 
 def savecsv():
     ### PEGA O PRIMEIRO NOME ###
@@ -26,12 +23,18 @@ def savecsv():
     values['proventos'] = prov
     values['descontos'] = desc
     values['liquido'] = liqui
+    values['admissão'] = admin
+    values['anos trabalhados'] = anostrab
     values.to_csv('valores.csv')
 
 
 def getvalues():
     proventos = driver.find_element_by_xpath("/html/body/form/div[4]/table[4]/thead/tr/td[2]").text
     descontos = driver.find_element_by_xpath("/html/body/form/div[4]/table[4]/thead/tr/td[3]").text
+    admissao = driver.find_element_by_xpath("//*[@id='colDir']/table/tbody/tr[2]/td[2]").text
+
+    ### PEGA SOMENTE O ANO ###
+    admissao = (admissao[-4:])
 
     ### REMOVE R$ ###
     descontos = (descontos[3:])
@@ -44,11 +47,18 @@ def getvalues():
     descontos = (re.sub("[.]", "", descontos))
     descontos = (re.sub("[,]", ".", descontos))
 
+
+    anosvar = (2020 - (Decimal(admissao)))
+    admin.append(admissao)
     prov.append(proventos)
     desc.append(descontos)
+    anostrab.append(anosvar)
     liqui.append(Decimal(proventos) - Decimal(descontos))
-    print(proventos)
-    print(descontos)
+    # print(proventos)
+    # print(descontos)
+    # print(anosvar)
+    # print(admissao)
+
 
 
 def scrap(driverPage):
@@ -85,10 +95,11 @@ def scrap(driverPage):
                 if i / 3 == 2:
                     i = 0
             indice = indice + 1
+        savecsv()
     ###GO TO NEXT PAGE###
-    if indice / 6 == 50:
-        driver.find_element_by_xpath("//*[@id='menuPaginacao']/li[5]/a").click()
-        scrap(driver.page_source)
+    # if indice / 6 == 50:
+    #     driver.find_element_by_xpath("//*[@id='menuPaginacao']/li[5]/a").click()
+    #     scrap(driver.page_source)
 
 
 driver.get(url)
