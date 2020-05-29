@@ -1,18 +1,5 @@
 from classificador.genderclassifier import GenderClassifier
 
-from classificador.genderclassifier import GenderClassifier
-# class Predict:
-#     def predicting(self):
-#         classifier = GenderClassifier()
-#         classifier.load("/home/renanredel/PycharmProjects/DataScrapingJoinville/models/example")
-#         name = input()
-#         while name is not "q":
-#             pred = classifier.predict([name.lower()])
-#             print("%s - %s" % (name, pred))
-#             name = input()
-#
-
-#
 pred, firstname = [], []
 
 

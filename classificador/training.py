@@ -6,7 +6,6 @@ from classificador.genderclassifier import GenderClassifier
 class Training:
     def train(self):
         dataset = pd.read_csv("/home/renanredel/PycharmProjects/DataScrapingJoinville/dados/nomes.csv").values
-
         classifier = GenderClassifier()
         classifier.train(dataset)
         classifier.save("/home/renanredel/PycharmProjects/DataScrapingJoinville/models/example")
