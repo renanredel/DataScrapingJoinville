@@ -1276,7 +1276,7 @@ venv/lib64
 venv/pyvenv.cfg
 venv/bin/f2py3
 venv/lib/python3.8/site-packages/__pycache__/six.cpython-38.pyc
-valores.csv
+resultado/valores.csv
 venv/bin/f2py
 venv/bin/f2py3.8
 venv/lib/python3.8/site-packages/dateutil/__init__.py
@@ -4554,3 +4554,7 @@ venv/lib/python3.8/site-packages/six-1.15.0.dist-info/RECORD
 venv/lib/python3.8/site-packages/six-1.15.0.dist-info/top_level.txt
 venv/lib/python3.8/site-packages/six-1.15.0.dist-info/WHEEL
 venv/lib/python3.8/site-packages/six.py
+/venv/
+classificador/__pycache__/genderclassifier.cpython-38.pyc
+classificador/__pycache__/predict.cpython-38.pyc
+classificador/__pycache__/training.cpython-38.pyc
