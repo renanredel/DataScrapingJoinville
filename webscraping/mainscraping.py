@@ -9,7 +9,9 @@ from selenium import webdriver
 
 from classificador.training import Training
 from classificador.predict import Predict
+from plot.graphs import PlotClass
 
+plot = PlotClass()
 treinar = Training()
 prever = Predict()
 
@@ -25,13 +27,13 @@ name, prov, desc, liqui, admin, anostrab = [], [], [], [], [], []
 
 def savecsv():
     ### PEGA O PRIMEIRO NOME ###
-    values['primeiro nome'] = ([x.split()[0] for x in name])
-    values['nome completo'] = name
+    values['primeiro_nome'] = ([x.split()[0] for x in name])
+    values['nome_completo'] = name
     values['proventos'] = prov
     values['descontos'] = desc
     values['liquido'] = liqui
     values['admissão'] = admin
-    values['anos trabalhados'] = anostrab
+    values['anos_trabalhados'] = anostrab
     values['genero'] = prever.predicting(name)
     values.to_csv("/home/renanredel/PycharmProjects/DataScrapingJoinville/resultado/valores.csv")
 
@@ -61,10 +63,6 @@ def getvalues():
     desc.append(descontos)
     anostrab.append(anosvar)
     liqui.append(Decimal(proventos) - Decimal(descontos))
-    # print(proventos)
-    # print(descontos)
-    # print(anosvar)
-    # print(admissao)
 
 
 def scrap(driverPage):
@@ -99,10 +97,12 @@ def scrap(driverPage):
                 ### RETORNA PARA JANELA PRINCIPAL ###
                 driver.switch_to_window(curWindowHndl)
                 j = j + 1
-                if j == 2:
-                    ## PARA TESTE ##
-                    # savecsv()
+                ## PARA TESTE
+                if j == 15:
+                    #savecsv()
                     j = 0
+
+                ## PARA TESTE
             else:
                 if i / 3 == 2:
                     i = 0
@@ -116,6 +116,7 @@ def scrap(driverPage):
 
 ##treinar.train()
 
+#plot.plot1()
 
 driver.get(url)
 
