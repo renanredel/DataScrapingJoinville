@@ -17,21 +17,22 @@ class PlotClass:
         data.drop(data[data['liquido'] == 0].index, inplace=True)
         data.reset_index(drop=True, inplace=True)
         print(data)
-        ### TODO excluir valores igual a zero
         mens = data[data.genero == "M"]
-        mens.sort_values(by=['liquido', 'anos_trabalhados'])
         womans = data[data.genero == "F"]
-        # womans = womans.sort_values(by=['liquido', 'anos_trabalhados'])
 
-        print(womans)
         ## AGRUPA OS ANOS TRABALHDOS, E PEGA O VALOR MEDIO DE TODOS OS SALARIOS ##
         womans = womans.groupby(['anos_trabalhados']).agg({'liquido': 'mean'}).reset_index()
+        mens = mens.groupby(['anos_trabalhados']).agg({'liquido': 'mean'}).reset_index()
 
+        print("homens")
+        print(mens)
+        print("mulheres")
         print(womans)
+
         plt.plot(womans.liquido, womans.anos_trabalhados)
         plt.plot(mens.liquido, mens.anos_trabalhados)
         plt.title("Salario conforme tempo trabalhado")
         plt.xlabel("Salario")
-        plt.ylabel("Anos")
+        plt.ylabel("Anos de serviço")
         plt.legend("Mulheres", "Homens")
         plt.show()

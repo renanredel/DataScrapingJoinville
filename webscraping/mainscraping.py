@@ -6,6 +6,7 @@ from decimal import Decimal
 from time import sleep
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException, NoSuchWindowException
 
 from classificador.training import Training
 from classificador.predict import Predict
@@ -71,13 +72,10 @@ def scrap(driverPage):
     indice = 0
     for result in soup.findAll('table', {'class': 'tableDados'}):
         i = 0
-        j = 0
         for line in result.findAll('td'):
             i = i + 1
             if i / 3 == 1:
-                print(line.text.ljust(10))
-                name.append(line.text)
-
+                print(line.text.ljust(10))          ### PRINT PARA VISUALIZAÇÃO DO PROGRESSO
                 ### SALVA A JANELA PRINCIPAL (PAGINA ATUAL) ###
                 curWindowHndl = driver.current_window_handle
 
@@ -89,24 +87,27 @@ def scrap(driverPage):
 
                 ### TROCA PARA A ABA ABERTA ###
                 driver.switch_to_window(driver.window_handles[1])
-                getvalues()
+
+                ### RESOLVE O ERRO CASO NÃO EXISTA SALARIO LANÇADO ###
+                try:
+                    getvalues()
+                except NoSuchElementException as e:
+                    print("Erro: " + str(e))
+                    driver.close()
+                    driver.switch_to_window(curWindowHndl)
+                    continue
 
                 ### FECHA A ABA ###
                 driver.close()
 
+                name.append(line.text)
                 ### RETORNA PARA JANELA PRINCIPAL ###
                 driver.switch_to_window(curWindowHndl)
-                j = j + 1
-                ## PARA TESTE
-                if j == 15:
-                    #savecsv()
-                    j = 0
-
-                ## PARA TESTE
             else:
                 if i / 3 == 2:
                     i = 0
             indice = indice + 1
+
         savecsv()
     ###GO TO NEXT PAGE###
     # if indice / 6 == 50:
@@ -114,9 +115,9 @@ def scrap(driverPage):
     #     scrap(driver.page_source)
 
 
-##treinar.train()
 
-#plot.plot1()
+
+##treinar.train()
 
 driver.get(url)
 
@@ -124,7 +125,7 @@ driver.get(url)
 driver.find_element_by_xpath("//*[@id='id_entidade']/option[15]").click()
 
 ### SELECIONA O MES ###
-driver.find_element_by_xpath("//*[@id='nr_mes']/option[2]").click()
+driver.find_element_by_xpath("//*[@id='nr_mes']/option[1]").click()
 
 ### SELECIONA O ANO ###
 driver.find_element_by_xpath("//*[@id='nr_ano']/option[2]").click()
@@ -136,9 +137,13 @@ driver.find_element_by_xpath("//*[@id='id_situacao']/option[19]").click()
 driver.find_element_by_xpath("//*[@id='iVinculoFiltroPeloCampo']/option[6]").click()
 
 ### DIGITA O CARGO ###
-driver.find_element_by_id("ds_cargo").send_keys("EDUCADOR")
+driver.find_element_by_id("ds_cargo").send_keys("EDUCADOR (PROF)")
 
 ### REALIZA A CONSULTA ###
 driver.find_element_by_xpath("/html/body/form/div[4]/table[1]/tbody/tr[6]/td[2]/input").click()
 
+
+
 scrap(driver.page_source)
+
+plot.plot1()
