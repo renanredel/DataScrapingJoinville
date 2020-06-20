@@ -100,7 +100,7 @@ class GenderClassifier(object):
       self.__train_data = np.array(train_data)
       self.__test_data = np.array(test_data)
 
-  def train(self, dataset, train_split=0.8, dense_size=32, learning_rate=0.001, batch_size=32, epochs=50, activation='relu'):
+  def train(self, dataset, train_split=0.8, dense_size=32, learning_rate=0.00001, batch_size=32, epochs=500, activation='relu'):
       self.__load_dataset(dataset, train_split)
 
       train_x = np.array(self.__train_data[:, 0].tolist())
